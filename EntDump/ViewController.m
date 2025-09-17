@@ -33,7 +33,6 @@
     
     [dropView addSubview:imageView];
     
-    [self.view addSubview:dropView];
     
     NSTextView *infoTextView = [[NSTextView alloc] init];
     infoTextView.string = @"Drag a Mach-O or a .app here to extract its entitlements.";
@@ -43,14 +42,15 @@
     infoTextView.selectable = NO;
     infoTextView.drawsBackground = NO;
     infoTextView.translatesAutoresizingMaskIntoConstraints = NO;
-    
+        
+    [self.view addSubview:dropView];
     [self.view addSubview:infoTextView];
     
     [NSLayoutConstraint activateConstraints:@[
-        [infoTextView.topAnchor constraintEqualToAnchor:self.view.topAnchor constant:60],
-        [infoTextView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor constant:20],
-        [infoTextView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor constant:-20],
-        [infoTextView.heightAnchor constraintEqualToConstant:30]
+        [infoTextView.centerXAnchor constraintEqualToAnchor:imageView.centerXAnchor],
+        [infoTextView.bottomAnchor constraintEqualToAnchor:imageView.topAnchor constant:40],
+        [infoTextView.widthAnchor constraintGreaterThanOrEqualToConstant:500],
+        [infoTextView.heightAnchor constraintGreaterThanOrEqualToConstant:100],
     ]];
     
     [NSLayoutConstraint activateConstraints:@[
@@ -77,3 +77,4 @@
 
 
 @end
+
