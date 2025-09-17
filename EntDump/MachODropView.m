@@ -123,7 +123,7 @@
     
     NSLog(@"Entitlements: %@", arr);
     
-    ResultWindow *resultWindow = [[ResultWindow alloc] initWithEntitlements:arr ContentRect:NSMakeRect(0, 0, 400, 400) styleMask:(NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable) backing:NSBackingStoreBuffered defer:NO];
+    ResultWindow *resultWindow = [[ResultWindow alloc] initWithEntitlements:arr ContentRect:NSMakeRect(0, 0, 400, 400) styleMask:(NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable) backing:NSBackingStoreBuffered defer:NO title:[NSString stringWithFormat:@"Entitlements for %@", [filePath lastPathComponent]]];
     
     [resultWindow center];
     [resultWindow makeKeyAndOrderFront:nil];

@@ -36,7 +36,7 @@
     [self.view addSubview:dropView];
     
     NSTextView *infoTextView = [[NSTextView alloc] init];
-    infoTextView.string = @"Drop a Mach-O or a .app here to extract its entitlements.";
+    infoTextView.string = @"Drag a Mach-O or a .app here to extract its entitlements.";
     infoTextView.font = [NSFont systemFontOfSize:16];
     infoTextView.alignment = NSTextAlignmentCenter;
     infoTextView.editable = NO;

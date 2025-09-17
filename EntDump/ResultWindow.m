@@ -7,21 +7,23 @@
 
 #import "ResultWindow.h"
 #import "CopyableTextField.h"
+#import "FlippedStackView.h"
 
 @implementation ResultWindow
 
--(instancetype)initWithEntitlements:(NSArray*)entitlements ContentRect:(NSRect)contentRect styleMask:(NSWindowStyleMask)style backing:(NSBackingStoreType)backingType defer:(BOOL)flag {
+-(instancetype)initWithEntitlements:(NSArray*)entitlements ContentRect:(NSRect)contentRect styleMask:(NSWindowStyleMask)style backing:(NSBackingStoreType)backingType defer:(BOOL)flag title:(NSString*)title {
     self = [super initWithContentRect:contentRect styleMask:style backing:backingType defer:flag];
     if (self) {
         
         self.releasedWhenClosed = NO;
         
-        [self setTitle:@"Entitlements"];
+        [self setTitle:title];
         
-        NSStackView *stackView = [NSStackView stackViewWithViews:@[]];
+        FlippedStackView *stackView = [FlippedStackView stackViewWithViews:@[]];
         stackView.orientation = NSUserInterfaceLayoutOrientationVertical;
         stackView.alignment = NSLayoutAttributeCenterX;
         stackView.spacing = 8.0;
+        stackView.distribution = NSStackViewDistributionGravityAreas;
         stackView.translatesAutoresizingMaskIntoConstraints = NO;
         
         for (NSString* entitlement in entitlements) {
@@ -65,24 +67,25 @@
         scrollView.autohidesScrollers = YES;
         scrollView.borderType = NSNoBorder;
         scrollView.translatesAutoresizingMaskIntoConstraints = NO;
-
-        scrollView.documentView = stackView;
         
+        scrollView.documentView = stackView;
+
         [self.contentView addSubview:scrollView];
 
         // Constraints for scrollView
+        // Scroll view constraints
         [NSLayoutConstraint activateConstraints:@[
+            [scrollView.topAnchor constraintEqualToAnchor:self.contentView.topAnchor constant:15],
+            [scrollView.bottomAnchor constraintEqualToAnchor:self.contentView.bottomAnchor],
             [scrollView.leadingAnchor constraintEqualToAnchor:self.contentView.leadingAnchor constant:1],
             [scrollView.trailingAnchor constraintEqualToAnchor:self.contentView.trailingAnchor constant:-1],
-            [scrollView.topAnchor constraintEqualToAnchor:self.contentView.topAnchor],
-            [scrollView.bottomAnchor constraintEqualToAnchor:self.contentView.bottomAnchor],
         ]];
-        // Constraints for stackView
+
+        // StackView constraints
         [NSLayoutConstraint activateConstraints:@[
-            [stackView.leadingAnchor constraintEqualToAnchor:scrollView.contentView.leadingAnchor constant:3],
-            [stackView.trailingAnchor constraintEqualToAnchor:scrollView.contentView.trailingAnchor constant:-1],
             [stackView.topAnchor constraintEqualToAnchor:scrollView.contentView.topAnchor constant:10],
-            [stackView.bottomAnchor constraintEqualToAnchor:scrollView.contentView.bottomAnchor constant:-10],
+            [stackView.leadingAnchor constraintEqualToAnchor:scrollView.contentView.leadingAnchor constant:3],
+            [stackView.trailingAnchor constraintEqualToAnchor:scrollView.contentView.trailingAnchor constant:-1]
         ]];
         
     }
