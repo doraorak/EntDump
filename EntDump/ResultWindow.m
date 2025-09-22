@@ -8,10 +8,11 @@
 #import "ResultWindow.h"
 #import "CopyableTextField.h"
 #import "FlippedStackView.h"
+#import "PopoverButton.h"
 
 @implementation ResultWindow
 
--(instancetype)initWithEntitlements:(NSArray*)entitlements ContentRect:(NSRect)contentRect styleMask:(NSWindowStyleMask)style backing:(NSBackingStoreType)backingType defer:(BOOL)flag title:(NSString*)title {
+-(instancetype)initWithEntitlements:(NSArray*)entitlements ContentRect:(NSRect)contentRect styleMask:(NSWindowStyleMask)style backing:(NSBackingStoreType)backingType defer:(BOOL)flag title:(NSString*)title path:(NSString*)path {
     self = [super initWithContentRect:contentRect styleMask:style backing:backingType defer:flag];
     if (self) {
         
@@ -45,18 +46,57 @@
             
             NSButton *copyButton = [NSButton buttonWithImage:[NSImage imageWithSystemSymbolName:@"document.on.document.fill" accessibilityDescription:@"copy"] target:label action:@selector(copyText:)];
             copyButton.translatesAutoresizingMaskIntoConstraints = NO;
-            copyButton.toolTip = @"Copy to Clipboard";
+            copyButton.toolTip = @"Copy to clipboard";
             
             NSGlassEffectView* buttonGlassView = [[NSGlassEffectView alloc] initWithFrame:copyButton.bounds];
             buttonGlassView.translatesAutoresizingMaskIntoConstraints = NO;
             [buttonGlassView setContentView:copyButton];
+        
+            //popover itself
             
-            NSStackView *hStack = [NSStackView stackViewWithViews:@[labelGlassView, buttonGlassView]];
+            NSPopover *popover = [[NSPopover alloc] init];
+            
+            NSTextField *valueLabel = [[NSTextField alloc] init];
+            
+            id value = GetValueOfEntitlement(entitlement, path);
+            
+            valueLabel.stringValue = [value description];
+            valueLabel.editable = NO;
+            valueLabel.selectable = YES;
+            valueLabel.bezeled = YES;
+            valueLabel.drawsBackground = YES;
+            valueLabel.font = [NSFont systemFontOfSize:14];
+            valueLabel.lineBreakMode = NSLineBreakByWordWrapping;
+            valueLabel.translatesAutoresizingMaskIntoConstraints = NO;
+            
+            NSGlassEffectView* valueGlassView = [[NSGlassEffectView alloc] initWithFrame:valueLabel.bounds];
+            valueGlassView.translatesAutoresizingMaskIntoConstraints = NO;
+            [valueGlassView setContentView:valueLabel];
+            
+            popover.contentViewController = [[NSViewController alloc] init];
+            popover.contentViewController.view = valueGlassView;
+            popover.behavior = NSPopoverBehaviorTransient;
+            
+            //popover relative view
+            
+            PopoverButton *valueButton = [PopoverButton buttonWithImage:[NSImage imageWithSystemSymbolName:@"eye.fill" accessibilityDescription:@"value"] target:nil action:@selector(showPopover:)];
+            valueButton.target = valueButton;
+            valueButton.translatesAutoresizingMaskIntoConstraints = NO;
+            valueButton.toolTip = @"Show value";
+            valueButton.popover = popover;
+            
+            NSGlassEffectView* valueButtonGlassView = [[NSGlassEffectView alloc] initWithFrame:valueButton.bounds];
+            valueButtonGlassView.translatesAutoresizingMaskIntoConstraints = NO;
+            [valueButtonGlassView setContentView:valueButton];
+            
+            //hstack
+            
+            NSStackView *hStack = [NSStackView stackViewWithViews:@[valueButtonGlassView,labelGlassView, buttonGlassView]];
             hStack.orientation = NSUserInterfaceLayoutOrientationHorizontal;
             hStack.alignment = NSLayoutAttributeCenterY;
             hStack.spacing = 8.0;
             hStack.translatesAutoresizingMaskIntoConstraints = NO;
-            
+                        
             [stackView addArrangedSubview:hStack];
 
         }

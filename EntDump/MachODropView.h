@@ -18,4 +18,5 @@
 
 @end
 
-NSArray<NSString *>* GetEntitlementsFromMachO(NSString *machOPath);
+NSArray<NSString *>* GetEntitlements(NSString *machOPath);
+

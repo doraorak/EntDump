@@ -9,7 +9,7 @@
 #import <Security/Security.h>
 
 // Function to extract entitlements from a Mach-O binary path
-NSArray<NSString *>* GetEntitlementsFromMachO(NSString *machOPath) {
+NSArray<NSString *>* GetEntitlements(NSString *machOPath) {
     NSURL *url = [NSURL fileURLWithPath:machOPath];
     SecStaticCodeRef staticCode = NULL;
     NSDictionary *entitlements = nil;
@@ -37,6 +37,28 @@ NSArray<NSString *>* GetEntitlementsFromMachO(NSString *machOPath) {
     return entitlementKeys;
 }
 
-// Example usage (for testing):
-// NSArray *ents = GetEntitlementsFromMachO(@"/path/to/some.app/Contents/MacOS/some");
-// NSLog(@"Entitlements: %@", ents);
+
+id GetValueOfEntitlement(NSString *entitlement, NSString* machOPath) {
+    
+    NSURL *url = [NSURL fileURLWithPath:machOPath];
+    SecStaticCodeRef staticCode = NULL;
+    NSDictionary *entitlements = nil;
+
+    OSStatus status = SecStaticCodeCreateWithPath((__bridge CFURLRef)url, kSecCSDefaultFlags, &staticCode);
+    if (status != errSecSuccess) {
+        NSLog(@"Failed to create static code for path: %@ (error: %d)", machOPath, (int)status);
+        return nil;
+    }
+    CFDictionaryRef info = NULL;
+    status = SecCodeCopySigningInformation(staticCode, kSecCSSigningInformation, &info);
+    if (status == errSecSuccess && info) {
+        NSDictionary *infoDict = (__bridge_transfer NSDictionary *)info;
+        entitlements = infoDict[(__bridge NSString *)kSecCodeInfoEntitlementsDict];
+    }
+    if (staticCode) {
+        CFRelease(staticCode);
+    }
+    
+    return entitlements[entitlement];
+    
+}

@@ -105,15 +105,15 @@
         NSString *executableName = [bundle objectForInfoDictionaryKey:@"CFBundleExecutable"];
   
         if (executableName) {
-            NSString *executablePath = [filePath stringByAppendingPathComponent:[NSString stringWithFormat:@"Contents/MacOS/%@", executableName]];
-            arr = GetEntitlementsFromMachO(executablePath);
+            filePath = [filePath stringByAppendingPathComponent:[NSString stringWithFormat:@"Contents/MacOS/%@", executableName]];
+            arr = GetEntitlements(filePath);
         } else {
             NSLog(@"Could not find CFBundleExecutable in Info.plist");
             return;
         }
     } else {
         // If it's a Mach-O file, use it directly
-        arr = GetEntitlementsFromMachO(filePath);
+        arr = GetEntitlements(filePath);
     }
     
     if (arr == nil) {
@@ -123,7 +123,7 @@
     
     NSLog(@"Entitlements: %@", arr);
     
-    ResultWindow *resultWindow = [[ResultWindow alloc] initWithEntitlements:arr ContentRect:NSMakeRect(0, 0, 400, 400) styleMask:(NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable) backing:NSBackingStoreBuffered defer:NO title:[NSString stringWithFormat:@"Entitlements for %@", [filePath lastPathComponent]]];
+    ResultWindow *resultWindow = [[ResultWindow alloc] initWithEntitlements:arr ContentRect:NSMakeRect(0, 0, 400, 400) styleMask:(NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskResizable) backing:NSBackingStoreBuffered defer:NO title:[NSString stringWithFormat:@"Entitlements for %@", [filePath lastPathComponent]] path:filePath];
     
     [resultWindow center];
     [resultWindow makeKeyAndOrderFront:nil];

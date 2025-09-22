@@ -9,10 +9,12 @@
 
 @implementation PopoverButton
 
-- (void)drawRect:(NSRect)dirtyRect {
-    [super drawRect:dirtyRect];
-    
-    // Drawing code here.
+- (void) showPopover:(id)sender {
+    if (self.popover.isShown) {
+        [self.popover close];
+    } else {
+        [self.popover showRelativeToRect:self.bounds ofView:self preferredEdge:NSRectEdgeMaxY];
+    }
 }
 
 @end

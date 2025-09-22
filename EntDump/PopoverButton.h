@@ -11,6 +11,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface PopoverButton : NSButton
 
+@property (nonatomic, strong) NSPopover *popover;
+
 @end
 
 NS_ASSUME_NONNULL_END

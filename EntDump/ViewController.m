@@ -33,7 +33,6 @@
     
     [dropView addSubview:imageView];
     
-    
     NSTextView *infoTextView = [[NSTextView alloc] init];
     infoTextView.string = @"Drag a Mach-O or a .app here to extract its entitlements.";
     infoTextView.font = [NSFont systemFontOfSize:16];
