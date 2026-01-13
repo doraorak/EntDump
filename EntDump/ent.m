@@ -8,11 +8,24 @@
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
 
+static NSMutableDictionary<NSString *, NSDictionary *> *entitlementsCache = nil;
+static dispatch_once_t cacheInitToken;
+
+static void EnsureCacheInitialized(void) {
+    dispatch_once(&cacheInitToken, ^{
+        entitlementsCache = [NSMutableDictionary dictionary];
+    });
+}
+
 // Function to extract entitlements from a Mach-O binary path
 NSArray<NSString *>* GetEntitlements(NSString *machOPath) {
+    EnsureCacheInitialized();
+    NSDictionary *entitlements = entitlementsCache[machOPath];
+    if (entitlements) {
+        return [entitlements allKeys];
+    }
     NSURL *url = [NSURL fileURLWithPath:machOPath];
     SecStaticCodeRef staticCode = NULL;
-    NSDictionary *entitlements = nil;
     NSArray<NSString *> *entitlementKeys = nil;
 
     OSStatus status = SecStaticCodeCreateWithPath((__bridge CFURLRef)url, kSecCSDefaultFlags, &staticCode);
@@ -27,6 +40,7 @@ NSArray<NSString *>* GetEntitlements(NSString *machOPath) {
         entitlements = infoDict[(__bridge NSString *)kSecCodeInfoEntitlementsDict];
         if ([entitlements isKindOfClass:[NSDictionary class]]) {
             entitlementKeys = [entitlements allKeys];
+            entitlementsCache[machOPath] = entitlements;
         }
     } else {
         NSLog(@"Failed to copy signing information (error: %d)", (int)status);
@@ -37,28 +51,30 @@ NSArray<NSString *>* GetEntitlements(NSString *machOPath) {
     return entitlementKeys;
 }
 
-
 id GetValueOfEntitlement(NSString *entitlement, NSString* machOPath) {
-    
-    NSURL *url = [NSURL fileURLWithPath:machOPath];
-    SecStaticCodeRef staticCode = NULL;
-    NSDictionary *entitlements = nil;
+    EnsureCacheInitialized();
+    NSDictionary *entitlements = entitlementsCache[machOPath];
+    if (!entitlements) {
+        NSURL *url = [NSURL fileURLWithPath:machOPath];
+        SecStaticCodeRef staticCode = NULL;
 
-    OSStatus status = SecStaticCodeCreateWithPath((__bridge CFURLRef)url, kSecCSDefaultFlags, &staticCode);
-    if (status != errSecSuccess) {
-        NSLog(@"Failed to create static code for path: %@ (error: %d)", machOPath, (int)status);
-        return nil;
+        OSStatus status = SecStaticCodeCreateWithPath((__bridge CFURLRef)url, kSecCSDefaultFlags, &staticCode);
+        if (status != errSecSuccess) {
+            NSLog(@"Failed to create static code for path: %@ (error: %d)", machOPath, (int)status);
+            return nil;
+        }
+        CFDictionaryRef info = NULL;
+        status = SecCodeCopySigningInformation(staticCode, kSecCSSigningInformation, &info);
+        if (status == errSecSuccess && info) {
+            NSDictionary *infoDict = (__bridge_transfer NSDictionary *)info;
+            entitlements = infoDict[(__bridge NSString *)kSecCodeInfoEntitlementsDict];
+            if ([entitlements isKindOfClass:[NSDictionary class]]) {
+                entitlementsCache[machOPath] = entitlements;
+            }
+        }
+        if (staticCode) {
+            CFRelease(staticCode);
+        }
     }
-    CFDictionaryRef info = NULL;
-    status = SecCodeCopySigningInformation(staticCode, kSecCSSigningInformation, &info);
-    if (status == errSecSuccess && info) {
-        NSDictionary *infoDict = (__bridge_transfer NSDictionary *)info;
-        entitlements = infoDict[(__bridge NSString *)kSecCodeInfoEntitlementsDict];
-    }
-    if (staticCode) {
-        CFRelease(staticCode);
-    }
-    
     return entitlements[entitlement];
-    
 }

@@ -31,6 +31,7 @@
 
 - (BOOL)performDragOperation:(id<NSDraggingInfo>)sender {
     NSPasteboard *pboard = [sender draggingPasteboard];
+    BOOL ret = NO;
     if ([[pboard types] containsObject:NSPasteboardTypeFileURL]) {
         NSArray *files = [pboard readObjectsForClasses:@[[NSURL class]] options:nil];
         for (NSURL *fileURL in files) {
@@ -41,14 +42,14 @@
             if ([self isAppOrMachOFile:filePath]) {
                 //NSLog(@"dropped file is app or macho");
                 [self handleDroppedFile:filePath];
-                return YES;
+                ret = YES;
             }
             else {
                 NSLog(@"dropped file is not app or macho");
             }
         }
     }
-    return NO;
+    return ret;
 }
 
 - (BOOL)isAppOrMachOFile:(NSString *)filePath {
